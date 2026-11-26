@@ -1,0 +1,33 @@
+@startuml 用例图
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor 乘客 as Passenger
+
+rectangle 武汉地铁模拟运行系统 {
+  usecase "查询线路与站点信息\n(某站线路数、某线站点数)" as UC01
+  usecase "查询中转站" as UC02
+  usecase "查询附近站点\n(线路距离小于n的站点)" as UC03
+  usecase "查询两点间全部无环路径" as UC04
+  usecase "查询最短路径" as UC05
+  usecase "简洁展示乘车方案" as UC06
+  usecase "计算乘车票价" as UC07
+  usecase "单程票计价" as UC07a
+  usecase "武汉通计价(9折)" as UC07b
+  usecase "定期票计价(0元)" as UC07c
+}
+
+Passenger --> UC01
+Passenger --> UC02
+Passenger --> UC03
+Passenger --> UC04
+Passenger --> UC05
+Passenger --> UC07
+
+UC05 ..> UC06 : <<include>>
+UC07 ..> UC04 : <<include>>
+UC07a --|> UC07
+UC07b --|> UC07
+UC07c --|> UC07
+@enduml

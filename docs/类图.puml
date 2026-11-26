@@ -1,0 +1,112 @@
+@startuml 类图
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+class Test {
+  - DATA_FILE: Path
+  + {static} main(args: String[]): void
+  - testAllPaths(network: SubwayNetwork): PathSearchResult
+  - testShortestPath(network: SubwayNetwork): RouteResult
+  - testFares(network: SubwayNetwork, allPaths: PathSearchResult): void
+}
+
+class SubwayNetwork {
+  - stations: Map<String, Station>
+  - lines: Map<String, SubwayLine>
+  + loadFromFile(filePath: Path): void
+  + getStation(name: String): Station
+  + findTransferStations(): Map<String, Set<String>>
+  + findNearbyStations(name: String, n: double): List<NearbyStation>
+  + findAllPaths(from: String, to: String): PathSearchResult
+  + findShortestPath(from: String, to: String): RouteResult
+  + getPathDistance(path: List<String>): double
+}
+
+class Station {
+  - name: String
+  - lineNames: Set<String>
+  - outgoingEdges: List<Edge>
+  + isTransferStation(): boolean
+  + getLineNames(): Set<String>
+}
+
+class SubwayLine {
+  - name: String
+  - stationNames: List<String>
+  - segmentDistances: List<Double>
+  + indexOfStation(name: String): int
+  + getStationCount(): int
+}
+
+class Edge {
+  - from: Station
+  - to: Station
+  - lineName: String
+  - distanceKm: double
+  + getDistanceKm(): double
+}
+
+class NearbyStation {
+  - stationName: String
+  - lineName: String
+  - distanceKm: double
+  + toString(): String
+}
+
+class PathSearchResult {
+  - paths: List<List<String>>
+  - truncated: boolean
+  + getPathCount(): int
+  + isTruncated(): boolean
+}
+
+class RouteResult {
+  - stationNames: List<String>
+  - edges: List<Edge>
+  - totalDistanceKm: double
+  - transferCount: int
+  + splitIntoSegments(): List<RideSegment>
+  + printItinerary(): void
+}
+
+class RideSegment {
+  - lineName: String
+  - fromStation: String
+  - toStation: String
+  - stationCount: int
+  - distanceKm: double
+}
+
+class FareCalculator {
+  - EPS: double
+  + {static} singleTicketFareYuan(km: double): int
+  + {static} rideFareJiao(km: double, t: TicketType): int
+  + {static} ticketPriceYuan(t: TicketType): int
+  + {static} formatFare(fareJiao: int): String
+}
+
+enum TicketType {
+  SINGLE
+  WUHAN_PASS
+  DAY_PASS_1
+  DAY_PASS_3
+  DAY_PASS_7
+}
+
+class SubwayException
+
+Test ..> SubwayNetwork : 使用
+Test ..> FareCalculator : 使用
+SubwayNetwork "1" *-- "0..*" Station : 拥有
+SubwayNetwork "1" *-- "0..*" SubwayLine : 拥有
+SubwayLine "1" -- "2..*" Station : 经过
+Station "1" *-- "0..*" Edge : 邻接边
+RouteResult "1" *-- "1..*" Edge : 乘车区间
+SubwayNetwork ..> NearbyStation : create
+SubwayNetwork ..> PathSearchResult : create
+SubwayNetwork ..> RouteResult : create
+SubwayNetwork ..> SubwayException : throw
+RouteResult ..> RideSegment : create
+FareCalculator ..> TicketType : 区分票种
+FareCalculator ..> SubwayException : throw
+@enduml
